@@ -40,7 +40,7 @@
                                 <div class="form-group">
                                     <label for="">Option</label>
                                     <select v-model="item.option" class="form-control">
-                                        <option v-for="variant in variants"
+                                        <option v-for="variant in variantsData"
                                                 :value="variant.id">
                                             {{ variant.title }}
                                         </option>
@@ -58,7 +58,7 @@
                             </div>
                         </div>
                     </div>
-                    <div class="card-footer" v-if="product_variant.length < variants.length && product_variant.length < 3">
+                    <div class="card-footer" v-if="product_variant.length < variantsData.length && product_variant.length < 3">
                         <button @click="newVariant" class="btn btn-primary">Add another option</button>
                     </div>
 
@@ -91,7 +91,7 @@
             </div>
         </div>
 
-        <button @click="saveProduct" type="submit" class="btn btn-lg btn-primary">Save</button>
+        <button @click="saveProduct" type="submit" class="btn btn-lg btn-primary">Update</button>
         <button type="button" class="btn btn-secondary btn-lg">Cancel</button>
     </section>
 </template>
@@ -110,17 +110,23 @@ export default {
         variants: {
             type: Array,
             required: true
-        }
+        },
+        allData:{
+            type: Array,
+            required: true
+        },
     },
     data() {
         return {
+            product_id:'',
             product_name: '',
             product_sku: '',
             description: '',
             images: [],
+            variantsData:[],
             product_variant: [
                 {
-                    option: this.variants[0].id,
+                    option: 1,
                     tags: []
                 }
             ],
@@ -133,10 +139,20 @@ export default {
             }
         }
     },
+    created(){
+        this.variantsData = this.variants.variantsData;
+        this.product_id = this.variants.product_id;
+        this.product_name = this.variants.product_name;
+        this.product_sku = this.variants.product_sku;
+        this.description = this.variants.description;
+        this.product_variant = this.variants.product_variant;
+        this.product_variant_prices = this.variants.product_variant_prices;
+        //console.log('dddddddd',this.variants.variantsData);
+    },
     methods: {
         // it will push a new object into product variant
         newVariant() {
-            let all_variants = this.variants.map(el => el.id)
+            let all_variants = this.variantsData.map(el => el.id)
             let selected_variants = this.product_variant.map(el => el.option);
             let available_variants = all_variants.filter(entry1 => !selected_variants.some(entry2 => entry1 == entry2))
             // console.log(available_variants)
@@ -177,7 +193,7 @@ export default {
             return ans;
         },
 
-        // store product into database
+        // update product into database
         saveProduct() {
             if(!this.product_name){
                 window.alert('Product name is required !');
@@ -185,6 +201,7 @@ export default {
                 window.alert('Product SKU is required !');
             }else{
                 let product = {
+                    id: this.product_id,
                     title: this.product_name,
                     sku: this.product_sku,
                     description: this.description,
@@ -192,10 +209,10 @@ export default {
                     product_variant: this.product_variant,
                     product_variant_prices: this.product_variant_prices
                 }
-                axios.post('/product', product).then(response => {
+                axios.post('/updateProduct', product).then(response => {
                     console.log(response.data);
                     window.alert(response.data.message);
-                    this.formReset();
+                    //this.formReset();
                 }).catch(error => {
                     console.log(error);
                 })

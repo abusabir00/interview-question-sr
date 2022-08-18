@@ -7,6 +7,11 @@ use App\Models\ProductVariant;
 use App\Models\ProductVariantPrice;
 use App\Models\Variant;
 use Illuminate\Http\Request;
+use App\Services\ProductServices;
+use File;
+use DB;
+
+
 
 class ProductController extends Controller
 {
@@ -15,9 +20,21 @@ class ProductController extends Controller
      *
      * @return \Illuminate\Contracts\Foundation\Application|\Illuminate\Contracts\View\Factory|\Illuminate\Http\Response|\Illuminate\View\View
      */
-    public function index()
+    public function index(ProductServices $ProductServices)
     {
-        return view('products.index');
+        $data = $ProductServices->getProducts();
+        return view('products.index',$data);
+    }
+
+    /**
+     * Display a listing search.
+     *
+     * @return \Illuminate\Contracts\Foundation\Application|\Illuminate\Contracts\View\Factory|\Illuminate\Http\Response|\Illuminate\View\View
+     */
+    public function search(Request $request, ProductServices $ProductServices)
+    {
+        $data = $ProductServices->getSearchProducts($request);
+        return view('products.index',$data);
     }
 
     /**
@@ -37,9 +54,9 @@ class ProductController extends Controller
      * @param \Illuminate\Http\Request $request
      * @return \Illuminate\Http\JsonResponse
      */
-    public function store(Request $request)
+    public function store(Request $request, ProductServices $ProductServices)
     {
-
+        return $ProductServices->storeProducts($request);
     }
 
 
@@ -60,10 +77,10 @@ class ProductController extends Controller
      * @param \App\Models\Product $product
      * @return \Illuminate\Http\Response
      */
-    public function edit(Product $product)
+    public function edit(Product $product,ProductServices $ProductServices)
     {
-        $variants = Variant::all();
-        return view('products.edit', compact('variants'));
+        $data_all = $ProductServices->editProductData($product);
+        return view('products.edit', $data_all);
     }
 
     /**
@@ -73,9 +90,9 @@ class ProductController extends Controller
      * @param \App\Models\Product $product
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, Product $product)
+    public function updateProduct(Request $request, ProductServices $ProductServices)
     {
-        //
+        return $ProductServices->updateProduct($request);
     }
 
     /**
